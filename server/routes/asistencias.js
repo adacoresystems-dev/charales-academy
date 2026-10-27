@@ -34,7 +34,8 @@ router.post('/', requireRoles('ADMINISTRADOR','SECRETARIA','ENTRENADOR'), requir
       FROM sesiones_entrenamiento WHERE id = ? FOR UPDATE`, [sessionId]);
     const session = sessions[0];
     if (!session) throw new HttpError(404,'Sesión no encontrada.');
-    if (session.estado === 'CANCELADO' || session.futura) throw new HttpError(409,'La sesión está cancelada o aún no ocurre.');
+    // MySQL puede devolver comparaciones como "0"/"1" al conservar BIGINT como texto.
+    if (session.estado === 'CANCELADO' || Number(session.futura) === 1) throw new HttpError(409,'La sesión está cancelada o aún no ocurre.');
     const administrative = req.auth.roles.some(r => ['ADMINISTRADOR','SECRETARIA'].includes(r));
     if (!administrative) {
       const [assigned] = await db.execute(`SELECT ec.id FROM entrenador_categoria ec

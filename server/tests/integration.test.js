@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs';
 import { pool } from '../config/db.js';
 import { app } from '../app.js';
 
-test('integración en MariaDB: acceso, propiedad, transacciones y restricciones', {
+test('integración SQL: acceso, propiedad, transacciones y restricciones', {
   skip: process.env.RUN_DB_TESTS !== '1' ? 'Requiere BD aislada y RUN_DB_TESTS=1' : false,
 }, async t => {
   assert.match(process.env.DB_NAME || '', /_test$/, 'Usa una BD cuyo nombre termine en _test.');

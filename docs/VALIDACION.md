@@ -31,3 +31,11 @@ En PowerShell configura cada variable con `$env:NOMBRE = 'valor'` y después eje
 Las pruebas insertan datos sintéticos de ejemplo en esa BD y no los eliminan al terminar. Para repetirlas, crea otra BD vacía terminada en `_test` e importa el esquema con ese nombre. El flujo de GitHub Actions utiliza una instancia temporal independiente.
 
 No se han probado cobros reales, recuperación de contraseña, envío de correo, cargas de imágenes ni la conexión completa de las pantallas, porque no están implementados en esta base inicial.
+
+## Comprobación adicional con MySQL
+
+El archivo database/charales_mysql.sql se importó completo en MySQL 8.0.46: 47 tablas y 2 vistas, sin errores. Las 16 comprobaciones de acceso, propiedad, asistencia transaccional y saldos terminaron correctamente. La instalación de destino del usuario es MySQL 8.0.45; no se ejecutó esa versión exacta en este entorno.
+
+Se utiliza STORED y acciones RESTRICT explícitas. El esquema MySQL crea charales_mysql sin tocar escuela_futbol. Además, el backend interpreta numéricamente la comparación de fecha de sesión: mysql2 puede devolver "0" y "1" como cadenas al conservar BIGINT.
+
+GitHub Actions incluye trabajos independientes para MySQL 8.0 y MariaDB 10.11. Para repetir la integración MySQL en una BD recién creada, sustituye charales_mysql por un nombre terminado en _test antes de importar el script; utiliza ese mismo nombre en DB_NAME.

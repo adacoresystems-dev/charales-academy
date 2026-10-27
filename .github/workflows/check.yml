@@ -40,3 +40,37 @@ jobs:
           DB_PASSWORD: test-only-password
           DB_HOST: 127.0.0.1
         run: npm test
+  mysql:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: test-only-password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -ptest-only-password"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Importar esquema MySQL en BD aislada
+        env:
+          MYSQL_PWD: test-only-password
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y default-mysql-client
+          sed 's/charales_mysql/charales_test/g' database/charales_mysql.sql | mysql -h 127.0.0.1 -u root
+      - name: Pruebas de integración con MySQL
+        env:
+          RUN_DB_TESTS: '1'
+          DB_NAME: charales_test
+          DB_USER: root
+          DB_PASSWORD: test-only-password
+          DB_HOST: 127.0.0.1
+        run: npm test

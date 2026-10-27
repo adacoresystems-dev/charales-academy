@@ -16,7 +16,11 @@ Base para continuar el proyecto: vistas existentes en React + TypeScript, servid
 
 Node.js 22.12 o posterior, npm y MariaDB 10.6 o posterior. La versión comprobada en este entorno se registra en `docs/VALIDACION.md`.
 
-## 1. Base de datos nueva
+## Si utilizas MySQL 8.0
+
+Usa **database/charales_mysql.sql**, que crea la base nueva **charales_mysql**, y configura `DB_NAME=charales_mysql` en server/.env. Consulta [la guía de MySQL](docs/MYSQL.md). No ejecutes el script de MariaDB en MySQL. Si un intento previo dejó tablas en escuela_futbol, esta instalación las conserva.
+
+## 1. Base de datos nueva (MariaDB)
 
 Abre `database/charales_completa.sql` en tu cliente de MariaDB y ejecútalo completo en una instalación nueva.
 
