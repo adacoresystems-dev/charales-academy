@@ -39,3 +39,9 @@ El archivo database/charales_mysql.sql se importó completo en MySQL 8.0.46: 47 
 Se utiliza STORED y acciones RESTRICT explícitas. El esquema MySQL crea charales_mysql sin tocar escuela_futbol. Además, el backend interpreta numéricamente la comparación de fecha de sesión: mysql2 puede devolver "0" y "1" como cadenas al conservar BIGINT.
 
 GitHub Actions incluye trabajos independientes para MySQL 8.0 y MariaDB 10.11. Para repetir la integración MySQL en una BD recién creada, sustituye charales_mysql por un nombre terminado en _test antes de importar el script; utiliza ese mismo nombre en DB_NAME.
+
+## Integración del formulario de acceso
+
+El cliente se verifica con `node --test tests/auth-client.test.mjs`, incluido en `npm test` y `npm run check`. Son seis pruebas con respuestas HTTP simuladas: envío de credenciales sin alterar la contraseña, identidad del servidor y encabezado Bearer, credenciales incorrectas, expiración, cierre con y sin red, perfiles permitidos y pantalla inicial que exige acceso incluso con un administrador demo en localStorage. La pantalla se renderiza con React en el servidor; esto no sustituye una prueba visual en navegador ni una conexión con la instalación MySQL del usuario.
+
+Las pruebas de backend permanecen incluidas. La integración con BD aislada requiere la configuración descrita arriba; no se ejecuta por defecto.

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAcademyStore } from './services/store';
 import { Navbar } from './components/layout/Navbar';
 import { Sidebar } from './components/layout/Sidebar';
@@ -27,10 +27,61 @@ import { NoticesAndReportsView } from './components/communication/NoticesAndRepo
 
 import { PaymentGatewayModal } from './components/finance/PaymentGatewayModal';
 import { TournamentModal } from './components/matches/TournamentModal';
-import { Player, Charge, Match } from './types';
+import { Player, Charge, Match, User } from './types';
+import { LoginView } from './components/auth/LoginView';
+import { clearSession, logout, onSessionExpired } from './services/api';
 
 export default function App() {
-  const store = useAcademyStore();
+  const [session, setSession] = useState<{ user: User; expiresIn: number } | null>(null);
+  const [message, setMessage] = useState('');
+  const [closing, setClosing] = useState(false);
+  useEffect(() => onSessionExpired(() => {
+    setSession(null);
+    setMessage('Tu sesión terminó. Inicia sesión nuevamente.');
+  }), []);
+  useEffect(() => {
+    if (!session) return;
+    const timer = window.setTimeout(() => {
+      clearSession();
+      setSession(null);
+      setMessage('Tu sesión expiró. Inicia sesión nuevamente.');
+    }, session.expiresIn * 1000);
+    return () => window.clearTimeout(timer);
+  }, [session]);
+  const closeSession = async () => {
+    setClosing(true);
+    try {
+      await logout();
+      setMessage('Sesión cerrada.');
+    } catch {
+      setMessage('Se cerró el acceso en este navegador. No se pudo confirmar el cierre en el servidor.');
+    } finally {
+      setSession(null);
+      setClosing(false);
+    }
+  };
+  if (!session) return <LoginView message={message} onLogin={value => {
+    setMessage('');
+    setSession(value);
+  }} />;
+  return <>
+    <div className="flex flex-wrap items-center justify-between gap-2 bg-[#253E7B] text-white px-4 py-2 text-sm">
+      <span>{session.user.nombre} · {session.user.email}</span>
+      <button type="button" onClick={closeSession} disabled={closing}
+        className="rounded-lg border border-white/50 px-3 py-1 disabled:opacity-50">
+        {closing ? 'Cerrando…' : 'Cerrar sesión'}
+      </button>
+    </div>
+    <div role="status" className="bg-amber-50 text-amber-900 px-4 py-2 text-sm">
+      Acceso validado. Los módulos aún muestran datos de demostración;
+      los cambios en esas vistas se guardan solo en este navegador.
+    </div>
+    <AuthenticatedApp key={session.user.id} user={session.user} />
+  </>;
+}
+
+function AuthenticatedApp({ user }: { user: User }) {
+  const store = useAcademyStore(user);
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [dashboardViewMode, setDashboardViewMode] = useState<'mockup' | 'metrics'>('mockup');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -66,14 +117,12 @@ export default function App() {
       {store.currentUser.rol === 'ENTRENADOR' ? (
         <CoachPortalView
           currentRole={store.currentUser.rol}
-          onSwitchRole={store.switchRole}
         />
       ) : (
         <>
           {/* Top Navbar */}
           <Navbar
             currentUser={store.currentUser}
-            onSwitchRole={store.switchRole}
             notifications={store.notifications}
             onMarkNotificationRead={store.markNotificationRead}
             onMarkAllRead={store.markAllNotificationsRead}

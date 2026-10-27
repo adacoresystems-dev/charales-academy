@@ -9,7 +9,7 @@
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1",
     "lint": "tsc --noEmit",
-    "test": "npm test --workspace server",
+    "test": "node --test tests/auth-client.test.mjs && npm test --workspace server",
     "check": "npm run lint && npm run build && npm test"
   },
   "dependencies": {

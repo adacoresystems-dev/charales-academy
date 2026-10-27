@@ -4,12 +4,12 @@
 
 El ZIP original contiene una aplicación React/Vite con TypeScript. El servidor agregado usa JavaScript/Express. No es Angular. `src/services/store.ts` usa localStorage y el portal de entrenador tiene otro conjunto de datos en `mockData.ts`.
 
-Conservamos esos componentes para no romper las vistas. La carpeta server no los conecta por sí sola. `src/services/api.ts` es el cliente de inicio, todavía no usado por las pantallas.
+Conservamos esos componentes para no romper las vistas. La carpeta server no los conecta por sí sola. `src/services/api.ts` ya conecta el formulario de acceso y el cierre de sesión. El resto de las vistas todavía no lo usa.
 
 ## Orden de trabajo
 
 1. Importar BD, configurar server/.env, crear administrador y comprobar /api/health.
-2. Construir pantalla real de login usando login() de api.ts. Quitar el selector libre de rol del flujo autenticado; usar auth/me para conocer perfiles permitidos.
+2. Comprobar el login ya conectado: acceso correcto, credenciales incorrectas y cierre de sesión. La identidad viene de POST /auth/login y el selector libre de roles fue retirado. El token vive en memoria; al recargar se pide acceso nuevamente. Las respuestas 401 de consultas autenticadas y el tiempo de expiración devuelven al formulario. GET /auth/me queda disponible para futuras consultas del perfil.
 3. Crear temporada, sede, categoría, tutor y jugador desde los endpoints que desarrollen. La API hoy entrega consultas, no todas las altas.
 4. Sustituir la lectura de jugadores en store.ts por GET /jugadores (administración) y /mi-portal/jugadores (tutor/entrenador). Retirar los datos de ejemplo para ese módulo una vez conectado.
 5. Implementar altas/ediciones con validación y transacciones. Después conectar los formularios.

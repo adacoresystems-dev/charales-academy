@@ -76,12 +76,8 @@ function setStored<T>(key: string, value: T): void {
   }
 }
 
-export function useAcademyStore() {
-  // Current logged in user
-  const [currentUser, setCurrentUser] = useState<User>(() =>
-    getStored<User>('current_user', INITIAL_USERS[0]) // Default admin, easily switchable
-  );
-
+export function useAcademyStore(currentUser: User) {
+  // La identidad es la cuenta validada por el backend, nunca el usuario demo persistido.
   const [users, setUsers] = useState<User[]>(() => getStored('users', INITIAL_USERS));
   const [seasons, setSeasons] = useState<Season[]>(() => getStored('seasons', INITIAL_SEASONS));
   const [venues, setVenues] = useState<Venue[]>(() => getStored('venues', INITIAL_VENUES));
@@ -148,7 +144,6 @@ export function useAcademyStore() {
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(() => getStored('audit_logs', INITIAL_AUDIT_LOGS));
 
   // Sync state to local storage
-  useEffect(() => setStored('current_user', currentUser), [currentUser]);
   useEffect(() => setStored('users', users), [users]);
   useEffect(() => setStored('seasons', seasons), [seasons]);
   useEffect(() => setStored('venues', venues), [venues]);
@@ -209,20 +204,6 @@ export function useAcademyStore() {
         console.warn('Native notification failed', e);
       }
     }
-  };
-
-  // Switch role / simulate login as another user
-  const switchRole = (role: Role) => {
-    const found = users.find((u) => u.rol === role);
-    if (found) {
-      setCurrentUser(found);
-      addAuditLog('CAMBIO_ROL_ACTIVO', 'Seguridad', `Sesión cambiada a perfil: ${found.nombre} (${role})`);
-    }
-  };
-
-  const loginAsUser = (user: User) => {
-    setCurrentUser(user);
-    addAuditLog('INICIO_SESION', 'Autenticación', `Inicio de sesión con éxito de ${user.nombre} (${user.rol})`);
   };
 
   // --- PLAYERS ACTIONS ---
@@ -1035,9 +1016,6 @@ export function useAcademyStore() {
     auditLogs,
 
     // Actions
-    setCurrentUser,
-    switchRole,
-    loginAsUser,
     addPlayer,
     updatePlayer,
     addCoach,

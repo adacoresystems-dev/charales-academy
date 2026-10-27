@@ -8,7 +8,7 @@ Base para continuar el proyecto: vistas existentes en React + TypeScript, servid
 
 - Las vistas originales se conservan y siguen en **modo demostración**: administración con `localStorage` y portal del entrenador con `mockData.ts`.
 - La API implementa inicio/cierre de sesión, permisos, consultas administrativas paginadas, consulta de jugadores propios, avisos filtrados, mensajes propios, notificaciones por usuario y registro transaccional de asistencia.
-- **Todavía no se han conectado las pantallas a la API.** Crear el repositorio y las rutas no realiza esa conexión automáticamente.
+- **El inicio y cierre de sesión ya están conectados a la API.** Las demás pantallas siguen con datos de demostración; sus cambios no se guardan en MySQL/MariaDB.
 - La pasarela de pago es simulada. No hay cobros reales, recuperación de contraseña, préstamos de material ni envíos externos de correo/push implementados.
 - El SQL contiene 47 tablas y 2 vistas. Incluye clasificación capturada del organizador para respaldar la tabla de posiciones.
 
@@ -82,7 +82,9 @@ npm run dev
 
 Frontend: http://localhost:3000 · API: http://127.0.0.1:3001/api/health
 
-Para comprobar el acceso real usa un cliente de API con `POST /api/auth/login`, cuerpo JSON `email` y `password`. Copia el token de la respuesta en `Authorization: Bearer TU_TOKEN` para las rutas protegidas. El selector de rol de las vistas es únicamente de demostración.
+Abre http://localhost:3000 e ingresa con el correo y la contraseña usados al crear el administrador. El servidor valida la cuenta y determina su rol; no hay selector libre de roles. El botón **Cerrar sesión** revoca la sesión en la API. El token solo vive en memoria: al recargar se solicita iniciar sesión otra vez.
+
+El aviso superior distingue el acceso real de los módulos que todavía usan datos de demostración. Si la cuenta tiene varios perfiles, se abre el primero en este orden: administrador, secretaría, entrenador y tutor. Un perfil no habilitado impide entrar. No hay registro público ni recuperación de contraseña implementados.
 
 ## Comprobaciones
 

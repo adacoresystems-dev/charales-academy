@@ -17,7 +17,6 @@ import userAvatarImg from '../../assets/images/charales_youth_player_portrait_17
 
 interface NavbarProps {
   currentUser: User;
-  onSwitchRole: (role: Role) => void;
   notifications: AppNotification[];
   onMarkNotificationRead: (id: string) => void;
   onMarkAllRead: () => void;
@@ -28,7 +27,6 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({
   currentUser,
-  onSwitchRole,
   notifications,
   onMarkNotificationRead,
   onMarkAllRead,
@@ -38,7 +36,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [showRoleDropdown, setShowRoleDropdown] = useState(false);
 
   const unreadCount = notifications.filter(
     (n) => !n.leida && n.rolesDestino.includes(currentUser.rol)
@@ -107,55 +104,12 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
         </div>
 
-        {/* Right Section: Messages, Notification Bell, User Avatar, and Role Switcher */}
+        {/* Right Section: Messages, Notification Bell, User Avatar, and Account Role */}
         <div className="flex items-center gap-3 lg:gap-4">
-          {/* Active Role Indicator (Only active role shown) */}
-          <div className="relative">
-            <button
-              onClick={() => setShowRoleDropdown(!showRoleDropdown)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-50 hover:bg-neutral-100 border border-neutral-300 text-[#111111] text-xs font-bold transition-all shadow-2xs cursor-pointer"
-              title="Rol activo actual (haz clic para cambiar de rol si es necesario)"
-            >
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] text-neutral-500 font-medium">Rol Activo:</span>
-              <div className="flex items-center gap-1.5 font-black text-[#111111]">
-                {roleLabels[currentUser.rol].icon}
-                <span>{roleLabels[currentUser.rol].name}</span>
-              </div>
-              <ChevronDown className={`w-3.5 h-3.5 text-neutral-500 transition-transform ${showRoleDropdown ? 'rotate-180' : ''}`} />
-            </button>
-
-            {showRoleDropdown && (
-              <div className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-neutral-200 p-1.5 z-50 text-xs animate-scaleUp">
-                <div className="px-2.5 py-1.5 border-b border-neutral-100 text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
-                  Cambiar Rol Activo
-                </div>
-                {(['ADMINISTRADOR', 'SECRETARIA', 'ENTRENADOR', 'PADRE_TUTOR'] as Role[]).map((r) => {
-                  const isActive = currentUser.rol === r;
-                  return (
-                    <button
-                      key={r}
-                      onClick={() => {
-                        onSwitchRole(r);
-                        setShowRoleDropdown(false);
-                      }}
-                      className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between transition-colors cursor-pointer ${
-                        isActive
-                          ? 'bg-[#E31B23] text-white shadow-md shadow-red-900/30'
-                          : 'text-neutral-700 hover:bg-neutral-50'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        {roleLabels[r].icon}
-                        <span>{roleLabels[r].name}</span>
-                      </div>
-                      {isActive && <span className="text-[10px] font-semibold text-white/90">Activo</span>}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+          <span className="flex items-center gap-2 text-xs font-bold text-slate-700">
+            {roleLabels[currentUser.rol].icon}
+            {roleLabels[currentUser.rol].name}
+          </span>
 
           {/* Chat Icon matching mockup */}
           <button
