@@ -1,0 +1,42 @@
+name: Comprobaciones
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: test-only-password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - name: Importar esquema en BD aislada
+        env:
+          MYSQL_PWD: test-only-password
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y mariadb-client
+          sed 's/escuela_futbol/charales_test/g' database/charales_completa.sql | mariadb -h 127.0.0.1 -u root
+      - name: Pruebas de integración
+        env:
+          RUN_DB_TESTS: '1'
+          DB_NAME: charales_test
+          DB_USER: root
+          DB_PASSWORD: test-only-password
+          DB_HOST: 127.0.0.1
+        run: npm test

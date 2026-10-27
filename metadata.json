@@ -1,0 +1,6 @@
+{
+  "name": "Escuela de Futbol Charales de Chapala",
+  "description": "Sistema integral de gestión deportiva, inscripciones, partidos, asistencias, pagos y comunicación para la Escuela de Futbol Charales de Chapala.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
