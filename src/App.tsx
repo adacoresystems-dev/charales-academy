@@ -3,6 +3,8 @@ import { useAcademyStore } from './services/store';
 import { Navbar } from './components/layout/Navbar';
 import { Sidebar } from './components/layout/Sidebar';
 import { MobileNav } from './components/layout/MobileNav';
+import { MobileDrawer } from './components/layout/MobileDrawer';
+import { DemoNotice } from './components/layout/DemoNotice';
 
 // Views
 import { CharalesDashboard } from './components/dashboard/CharalesDashboard';
@@ -64,27 +66,23 @@ export default function App() {
     setMessage('');
     setSession(value);
   }} />;
-  return <>
-    <div className="flex flex-wrap items-center justify-between gap-2 bg-[#253E7B] text-white px-4 py-2 text-sm">
-      <span>{session.user.nombre} · {session.user.email}</span>
-      <button type="button" onClick={closeSession} disabled={closing}
-        className="rounded-lg border border-white/50 px-3 py-1 disabled:opacity-50">
-        {closing ? 'Cerrando…' : 'Cerrar sesión'}
-      </button>
-    </div>
-    <div role="status" className="bg-amber-50 text-amber-900 px-4 py-2 text-sm">
-      Acceso validado. Los módulos aún muestran datos de demostración;
-      los cambios en esas vistas se guardan solo en este navegador.
-    </div>
-    <AuthenticatedApp key={session.user.id} user={session.user} />
-  </>;
+  return <AuthenticatedApp key={session.user.id} user={session.user} onLogout={closeSession} closing={closing} />;
 }
 
-function AuthenticatedApp({ user }: { user: User }) {
+function AuthenticatedApp({ user, onLogout, closing }: { user: User; onLogout: () => void; closing: boolean }) {
   const store = useAcademyStore(user);
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [dashboardViewMode, setDashboardViewMode] = useState<'mockup' | 'metrics'>('mockup');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sidebarMode, setSidebarMode] = useState<'expanded' | 'compact' | 'hidden'>(() => {
+    try {
+      const saved = localStorage.getItem('charales-sidebar');
+      return saved === 'compact' || saved === 'hidden' ? saved : 'expanded';
+    } catch { return 'expanded'; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem('charales-sidebar', sidebarMode); } catch { /* Optional preference. */ }
+  }, [sidebarMode]);
 
   // Global modals state
   const [selectedPlayerForDetail, setSelectedPlayerForDetail] = useState<Player | null>(null);
@@ -113,10 +111,12 @@ function AuthenticatedApp({ user }: { user: User }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] text-[#111111] flex flex-col font-sans">
+    <div className="min-h-screen bg-[#f3f5f9] text-[#111111] flex flex-col font-sans">
       {store.currentUser.rol === 'ENTRENADOR' ? (
         <CoachPortalView
           currentRole={store.currentUser.rol}
+          onLogout={onLogout}
+          closing={closing}
         />
       ) : (
         <>
@@ -129,50 +129,36 @@ function AuthenticatedApp({ user }: { user: User }) {
             onNavigateTab={handleNavigateTab}
             mobileMenuOpen={mobileMenuOpen}
             setMobileMenuOpen={setMobileMenuOpen}
+            sidebarVisible={sidebarMode !== 'hidden'}
+            onToggleSidebar={() => setSidebarMode(mode => mode === 'hidden' ? 'expanded' : 'hidden')}
+            onLogout={onLogout}
+            closing={closing}
           />
 
-      {/* Main Container */}
-      <div className="flex-1 flex max-w-7xl w-full mx-auto pb-16 md:pb-6">
-        {/* Desktop Sidebar */}
-        <div className="hidden md:block">
-          <Sidebar
-            currentRole={store.currentUser.rol}
-            activeTab={activeTab}
-            onSelectTab={handleNavigateTab}
-          />
-        </div>
-
-        {/* Mobile Dropdown Drawer when hamburger opened */}
-        {mobileMenuOpen && (
-          <div className="md:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-xs flex flex-col">
-            <div className="bg-white text-[#111111] w-72 h-full p-4 overflow-y-auto space-y-3 shadow-2xl">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-200">
-                <span className="font-bold text-sm text-[#3B59A8]">Menú de Navegación</span>
-                <button
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-slate-500 hover:text-[#111111] p-1 font-bold text-lg"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <Sidebar
-                currentRole={store.currentUser.rol}
-                activeTab={activeTab}
-                onSelectTab={handleNavigateTab}
-              />
-            </div>
+      <div className="flex-1 flex w-full pb-20 md:pb-0">
+        {sidebarMode !== 'hidden' && (
+          <div className="hidden md:block shrink-0">
+            <Sidebar
+              currentRole={store.currentUser.rol}
+              activeTab={activeTab}
+              onSelectTab={handleNavigateTab}
+              compact={sidebarMode === 'compact'}
+              onToggleCompact={() => setSidebarMode(mode => mode === 'compact' ? 'expanded' : 'compact')}
+            />
           </div>
         )}
-
-        {/* Main Content Viewport */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0 overflow-hidden">
+        <MobileDrawer open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)}>
+          <Sidebar currentRole={store.currentUser.rol} activeTab={activeTab} onSelectTab={handleNavigateTab} mobile />
+        </MobileDrawer>
+        <main id="main-content" className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8">
+          <div className="max-w-[1500px] mx-auto space-y-5">
+          <DemoNotice />
           {/* 1. DASHBOARD VIEW */}
           {activeTab === 'dashboard' && (
             <div className="space-y-4">
               {/* View Switcher Header: Mockup Oficial vs KPIs */}
-              <div className="flex items-center justify-between pb-1">
-                <div className="flex items-center gap-1.5 bg-slate-200/70 p-1 rounded-xl text-xs font-bold">
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-1">
+                <div className="flex items-center gap-1.5 bg-white border border-slate-200 p-1 rounded-xl shadow-sm text-xs font-bold">
                   <button
                     onClick={() => setDashboardViewMode('mockup')}
                     className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
@@ -191,7 +177,7 @@ function AuthenticatedApp({ user }: { user: User }) {
                         : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
-                    Panel por Rol
+                    Resumen de mi perfil
                   </button>
                 </div>
 
@@ -390,11 +376,13 @@ function AuthenticatedApp({ user }: { user: User }) {
               currentRole={store.currentUser.rol}
             />
           )}
+          </div>
         </main>
       </div>
 
       {/* Mobile Bottom Navigation */}
       <MobileNav
+        onOpenMenu={() => setMobileMenuOpen(true)}
         currentRole={store.currentUser.rol}
         activeTab={activeTab}
         onSelectTab={handleNavigateTab}

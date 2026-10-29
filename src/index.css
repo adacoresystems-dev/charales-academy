@@ -29,3 +29,17 @@
     break-inside: avoid;
   }
 }
+
+@layer base {
+  body { margin: 0; background: #f3f5f9; color: #172033; }
+  button:not(:disabled), select { cursor: pointer; }
+  button:disabled { cursor: wait; }
+  :focus-visible { outline: 3px solid #6286dc; outline-offset: 3px; }
+}
+.club-sidebar { background: linear-gradient(165deg, #172237 0%, #101827 70%); }
+.club-sidebar nav { scrollbar-width: thin; scrollbar-color: #334155 transparent; }
+.drawer-enter { animation: drawer-enter 180ms ease-out; }
+@keyframes drawer-enter { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}

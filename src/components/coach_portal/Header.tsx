@@ -1,8 +1,13 @@
+import { Avatar } from '../common/Avatar';
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, Bell, Check, ChevronDown, Calendar, Shield, ExternalLink } from 'lucide-react';
+import { Menu, Bell, Check, ChevronDown, Calendar, Shield, ExternalLink, LogOut, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { Coach, NotificationItem } from './types';
 
 interface HeaderProps {
+  desktopVisible?: boolean;
+  onToggleDesktop?: () => void;
+  onLogout?: () => void;
+  closing?: boolean;
   onToggleSidebar: () => void;
   activeCoach: Coach;
   selectedCategory: string;
@@ -16,6 +21,10 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   onToggleSidebar,
+  desktopVisible,
+  onToggleDesktop,
+  onLogout,
+  closing,
   activeCoach,
   selectedCategory,
   onSelectCategory,
@@ -44,21 +53,24 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="sticky top-0 z-30 h-16 bg-white border-b border-neutral-200 px-4 md:px-6 flex items-center justify-between gap-4 shadow-xs">
       {/* Left zone: Hamburger + Brand + Category */}
-      <div className="flex items-center gap-3 md:gap-4">
+      <div className="flex items-center gap-2 md:gap-4 min-w-0">
         <button
           onClick={onToggleSidebar}
-          className="p-2 rounded-lg text-neutral-700 hover:bg-neutral-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#3B59A8]"
+          className="md:hidden p-2 rounded-lg text-neutral-700 hover:bg-neutral-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#3B59A8]"
           aria-label="Abrir menú"
         >
           <Menu className="w-5 h-5" />
         </button>
 
+        <button onClick={onToggleDesktop} aria-label={desktopVisible ? 'Ocultar menú' : 'Mostrar menú'} aria-expanded={desktopVisible} aria-controls="coach-desktop-navigation" className="hidden md:block p-2 rounded-lg text-slate-600 hover:bg-slate-100">
+          {desktopVisible ? <PanelLeftClose className="w-5 h-5" /> : <PanelLeftOpen className="w-5 h-5" />}
+        </button>
         {/* Brand label & DEMO pill matching screenshot */}
         <div className="flex items-center gap-2">
           <span className="text-xl font-extrabold tracking-tight text-[#111111]">
             Charales
           </span>
-          <span className="px-2 py-0.5 text-[11px] font-bold rounded-md bg-[#3B59A8] text-white tracking-wider">
+          <span className="hidden sm:inline-block px-2 py-0.5 text-[11px] font-bold rounded-md bg-[#3B59A8] text-white tracking-wider">
             DEMO
           </span>
         </div>
@@ -83,7 +95,8 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Right zone: Notification bell + Coach profile */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
+        {onLogout && <button onClick={onLogout} disabled={closing} aria-label="Cerrar sesión" title="Cerrar sesión" className="p-2 rounded-lg text-slate-500 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"><LogOut className="w-4 h-4" /></button>}
         {/* Notifications Popover */}
         <div className="relative" ref={notifRef}>
           <button
@@ -173,12 +186,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Coach profile info */}
         <div className="flex items-center gap-3 pl-2 border-l border-neutral-200">
-          <img
-            src={activeCoach.avatar}
-            alt={activeCoach.name}
-            referrerPolicy="no-referrer"
-            className="w-9 h-9 rounded-full object-cover border-2 border-[#3B59A8]"
-          />
+          <Avatar src={activeCoach.avatar} name={activeCoach.name} className="w-9 h-9 rounded-full object-cover border-2 border-[#3B59A8]" />
           <div className="hidden lg:flex flex-col text-left">
             <span className="text-xs font-bold text-neutral-900 leading-tight">
               {activeCoach.name}

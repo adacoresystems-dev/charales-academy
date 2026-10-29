@@ -1,3 +1,4 @@
+import { DemoNotice } from '../layout/DemoNotice';
 import React, { useState } from 'react';
 import { 
   mockCoaches, 
@@ -31,6 +32,8 @@ import { PdfReportModal } from './PdfReportModal';
 import { Role } from '../../types';
 
 interface CoachPortalViewProps {
+  onLogout?: () => void;
+  closing?: boolean;
   currentRole?: Role;
   onSwitchRole?: (role: Role) => void;
   initialTab?: NavigationTab;
@@ -38,6 +41,8 @@ interface CoachPortalViewProps {
 
 export const CoachPortalView: React.FC<CoachPortalViewProps> = ({
   currentRole = 'ENTRENADOR',
+  onLogout,
+  closing,
   onSwitchRole,
   initialTab = 'inicio',
 }) => {
@@ -46,6 +51,12 @@ export const CoachPortalView: React.FC<CoachPortalViewProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<string>(activeCoach.assignedCategories[0]);
   const [currentTab, setCurrentTab] = useState<NavigationTab>(initialTab);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [desktopVisible, setDesktopVisible] = useState(() => {
+    try { return localStorage.getItem('charales-coach-sidebar') !== 'hidden'; } catch { return true; }
+  });
+  React.useEffect(() => {
+    try { localStorage.setItem('charales-coach-sidebar', desktopVisible ? 'expanded' : 'hidden'); } catch { /* Optional preference. */ }
+  }, [desktopVisible]);
 
   // Core Data State
   const [players, setPlayers] = useState<Player[]>(mockPlayers);
@@ -159,7 +170,7 @@ export const CoachPortalView: React.FC<CoachPortalViewProps> = ({
   const nextMatch = matches.find(m => m.category === selectedCategory && m.status === 'Programado');
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] text-[#111111] flex flex-col font-sans -m-4 sm:-m-6 lg:-m-8">
+    <div className="min-h-screen bg-[#F8F9FA] text-[#111111] flex flex-col font-sans">
       {/* Sidebar Navigation */}
       <Sidebar
         currentTab={currentTab}
@@ -169,14 +180,19 @@ export const CoachPortalView: React.FC<CoachPortalViewProps> = ({
         onSelectCoach={handleSelectCoach}
         unreadNotifsCount={unreadNotifsCount}
         isOpen={sidebarOpen}
+        desktopVisible={desktopVisible}
         onCloseMobile={() => setSidebarOpen(false)}
       />
 
       {/* Main Content Area (offset by 72 = 18rem on md screens) */}
-      <div className="md:pl-72 flex flex-col flex-1 min-w-0 transition-all">
+      <div className={`flex flex-col flex-1 min-w-0 ${desktopVisible ? 'md:pl-72' : ''}`}>
         {/* Top Header */}
         <Header
           onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          desktopVisible={desktopVisible}
+          onToggleDesktop={() => setDesktopVisible(value => !value)}
+          onLogout={onLogout}
+          closing={closing}
           activeCoach={activeCoach}
           selectedCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
@@ -188,7 +204,8 @@ export const CoachPortalView: React.FC<CoachPortalViewProps> = ({
         />
 
         {/* View Content Port */}
-        <main className="flex-1 p-4 md:p-8 max-w-7xl w-full mx-auto">
+        <main id="main-content" className="flex-1 p-4 md:p-8 max-w-[1500px] w-full mx-auto space-y-5">
+          <DemoNotice />
           {currentTab === 'inicio' && (
             <DashboardView
               coach={activeCoach}

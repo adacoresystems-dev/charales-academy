@@ -1,3 +1,4 @@
+import { Avatar } from '../common/Avatar';
 import React, { useState } from 'react';
 import {
   Search,
@@ -318,11 +319,11 @@ export const PlayerList: React.FC<PlayerListProps> = ({
         </div>
 
         {/* Category Filter */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:flex gap-2 w-full md:w-auto min-w-0">
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-700"
+            className="min-w-0 w-full sm:w-auto px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-700"
           >
             <option value="all">Todas las Categorías</option>
             {categories.map((c) => (
@@ -336,7 +337,7 @@ export const PlayerList: React.FC<PlayerListProps> = ({
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-700"
+            className="min-w-0 w-full sm:w-auto px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-700"
           >
             <option value="all">Todos los Estatus</option>
             <option value="ACTIVO">Activos</option>
@@ -382,11 +383,7 @@ export const PlayerList: React.FC<PlayerListProps> = ({
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
                         {player.fotoUrl ? (
-                          <img
-                            src={player.fotoUrl}
-                            alt={player.nombre}
-                            className="w-10 h-10 rounded-xl object-cover border border-[#3B59A8]/20 shadow-xs shrink-0"
-                          />
+                          <Avatar src={player.fotoUrl} name={player.nombre} className="w-10 h-10 rounded-xl object-cover border border-[#3B59A8]/20 shadow-xs shrink-0" />
                         ) : (
                           <div className="w-10 h-10 rounded-xl bg-[#EEF2FA] border border-[#3B59A8]/20 text-[#3B59A8] font-bold flex items-center justify-center shrink-0 text-xs">
                             {player.numeroCamiseta ? `#${player.numeroCamiseta}` : player.nombre[0]}
@@ -518,11 +515,7 @@ export const PlayerList: React.FC<PlayerListProps> = ({
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     {player.fotoUrl ? (
-                      <img
-                        src={player.fotoUrl}
-                        alt={player.nombre}
-                        className="w-11 h-11 rounded-xl object-cover border border-[#3B59A8]/20 shadow-xs shrink-0"
-                      />
+                      <Avatar src={player.fotoUrl} name={player.nombre} className="w-11 h-11 rounded-xl object-cover border border-[#3B59A8]/20 shadow-xs shrink-0" />
                     ) : (
                       <div className="w-11 h-11 rounded-xl bg-[#EEF2FA] border border-[#3B59A8]/20 text-[#3B59A8] font-bold flex items-center justify-center shrink-0 text-sm">
                         {player.numeroCamiseta ? `#${player.numeroCamiseta}` : player.nombre[0]}

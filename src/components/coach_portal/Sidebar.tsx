@@ -1,3 +1,4 @@
+import { Avatar } from '../common/Avatar';
 import React from 'react';
 import { 
   Home, 
@@ -14,6 +15,7 @@ import {
 } from 'lucide-react';
 import { ClubLogo } from './ClubLogo';
 import { Coach } from './types';
+import { MobileDrawer } from '../layout/MobileDrawer';
 
 export type NavigationTab = 
   | 'inicio' 
@@ -33,6 +35,7 @@ interface SidebarProps {
   onSelectCoach: (coach: Coach) => void;
   unreadNotifsCount: number;
   isOpen: boolean;
+  desktopVisible?: boolean;
   onCloseMobile: () => void;
 }
 
@@ -44,6 +47,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectCoach,
   unreadNotifsCount,
   isOpen,
+  desktopVisible = true,
   onCloseMobile
 }) => {
   const [showCoachMenu, setShowCoachMenu] = React.useState(false);
@@ -59,22 +63,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'avisos' as NavigationTab, label: 'Avisos & Comunicación', icon: Bell, badge: unreadNotifsCount > 0 ? `${unreadNotifsCount}` : null },
   ];
 
-  return (
-    <>
-      {/* Mobile backdrop */}
-      {isOpen && (
-        <div 
-          onClick={onCloseMobile}
-          className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-xs transition-opacity"
-        />
-      )}
-
-      {/* Sidebar container */}
-      <aside className={`
-        fixed top-0 bottom-0 left-0 z-50 w-72 bg-[#111111] text-white flex flex-col justify-between
-        transition-transform duration-300 ease-in-out border-r border-neutral-800
-        ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-      `}>
+  const content = <>
         {/* Dynamic Sport Stripes in sidebar background bottom corner (matching provided interface screenshot) */}
         <div className="absolute bottom-0 left-0 right-0 pointer-events-none overflow-hidden h-40 opacity-90">
           <svg className="w-full h-full" viewBox="0 0 288 160" preserveAspectRatio="none" fill="none">
@@ -106,9 +95,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             return (
               <button
                 key={item.id}
+                aria-current={isActive ? 'page' : undefined}
                 onClick={() => {
                   onSelectTab(item.id);
-                  onCloseMobile();
+                  if (window.matchMedia('(max-width: 767px)').matches) onCloseMobile();
                 }}
                 className={`
                   w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150
@@ -147,12 +137,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className="w-full flex items-center justify-between p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors border border-white/10 text-left"
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                <img 
-                  src={activeCoach.avatar} 
-                  alt={activeCoach.name} 
-                  referrerPolicy="no-referrer"
-                  className="w-9 h-9 rounded-full object-cover border border-[#3B59A8] shrink-0" 
-                />
+                <Avatar src={activeCoach.avatar} name={activeCoach.name} className="w-9 h-9 rounded-full object-cover border border-[#3B59A8] shrink-0" />
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-semibold text-white truncate">
                     {activeCoach.name}
@@ -193,7 +178,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
             )}
           </div>
         </div>
-      </aside>
-    </>
-  );
+  </>;
+  return <>
+    {desktopVisible && <aside id="coach-desktop-navigation" aria-label="Navegación del entrenador" className="hidden md:flex fixed inset-y-0 left-0 z-40 w-72 bg-[#111827] text-white flex-col justify-between border-r border-white/10">{content}</aside>}
+    <MobileDrawer open={isOpen} onClose={onCloseMobile}>
+      <aside id="mobile-navigation" className="relative flex flex-col h-full bg-[#111827] text-white">{content}</aside>
+    </MobileDrawer>
+  </>;
 };

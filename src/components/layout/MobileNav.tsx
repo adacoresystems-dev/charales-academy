@@ -6,6 +6,7 @@ import {
   MessageSquare,
   CalendarCheck2,
   LayoutDashboard,
+  Menu,
 } from 'lucide-react';
 import { Role } from '../../types';
 
@@ -13,24 +14,24 @@ interface MobileNavProps {
   currentRole: Role;
   activeTab: string;
   onSelectTab: (tab: string) => void;
+  onOpenMenu?: () => void;
 }
 
 export const MobileNav: React.FC<MobileNavProps> = ({
   currentRole,
   activeTab,
   onSelectTab,
+  onOpenMenu,
 }) => {
   const tabs = [
     { id: 'dashboard', label: 'Inicio', icon: LayoutDashboard },
     { id: 'jugadores', label: 'Jugadores', icon: Users },
-    { id: 'entrenamientos', label: 'Entrenamientos', icon: CalendarCheck2 },
-    { id: 'partidos', label: 'Partidos', icon: Trophy },
     { id: 'pagos', label: 'Pagos', icon: CreditCard },
-    { id: 'avisos_reportes', label: 'Avisos', icon: MessageSquare },
+    { id: 'menu', label: 'Más', icon: Menu },
   ];
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-1 py-1 flex items-center justify-around shadow-lg">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 pt-1 pb-[max(4px,env(safe-area-inset-bottom))] flex items-center justify-around shadow-lg">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive =
@@ -43,7 +44,9 @@ export const MobileNav: React.FC<MobileNavProps> = ({
         return (
           <button
             key={tab.id}
-            onClick={() => onSelectTab(tab.id)}
+            onClick={() => tab.id === 'menu' ? onOpenMenu?.() : onSelectTab(tab.id)}
+            aria-label={tab.id === 'menu' ? 'Ver todas las secciones' : tab.label}
+            aria-current={isActive ? 'page' : undefined}
             className={`flex flex-col items-center justify-center py-1.5 px-2 rounded-xl transition-all ${
               isActive ? 'text-[#E31B23] font-black' : 'text-neutral-500 hover:text-[#3B59A8]'
             }`}
